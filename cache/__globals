@@ -1,0 +1,13 @@
+setup-extended-version	
+twitter-count-data	!=	as.numeric	read.csv
+twitter-count-distributions	as.character	axis	benfordProbabilitiesBase10	c	favoritesCountVector	followersCountVector	for	friendsCountVector	getFirstDigit	hist	layout	length	listedCountVector	matrix	points	seq	statusesCountVector
+log-powers-of-two	^	as.character	axis	c	log10	plot	rect	replicate	seq
+gitHub-setup	>=	as.numeric	getTwoSignificantDigits	na.omit	options	read.csv
+github-data-digit-distributions	benfordTwoDigitProbabilitiesBase10	c	commentsCountFirstDigits	dislikesCountFirstDigits	forksCountFirstDigits	hist	layout	length	likesCountFirstDigits	matrix	points	seq	starsCountFirstDigits	viewsCountFirstDigits
+wikipedia-data-digits-histogram	[<-	as.numeric	c	F	getTwoDigitBenfordDensities	getTwoSignificantDigits	hist	length	points	read.csv	replicate	seq
+conformity-tests-calculations	^	<	==	>	[<-	$	abs	as.numeric	cos	edist.benftest	exp	floor	for	getFirstDigits	if	jointdigit.benftest	jpsq.benftest	ks.test	log	meandigit.benftest	pbenf	pi	qchisq	replicate	sin	sqrt	sum
+conformity-test-twitter-example	$	floor	hist	ks.test	log	seq	sprintf	statusesCountVector
+case-study-hashtag-hijacking-twitter	$	abline	alpha	AnomalyDetectionVec	as.Date	as.numeric	as.POSIXct	axis	breakout	c	calculateWindowStarts	data.frame	F	format	layout	matrix	plot	points	read.csv	rect	seq	sprintf	T
+case-study-pokemon	$	abline	alpha	AnomalyDetectionVec	as.Date	as.numeric	as.POSIXct	axis	c	calculateWindowStarts	data.frame	events	eventsTableOrdered	F	format	grepl	head	layout	matrix	names	paste	plot	points	read.csv	rect	seq	sort	T	table
+synthetic-experiments-setup	^	$	AnomalyDetectionTs	as.numeric	as.POSIXct	breakout	c	calculateKS	cpt.mean	cpt.meanvar	cpt.var	data.frame	e.agglo	e.cp3o	e.divisive	eventDetection	F	for	getOutliers	length	matrix	mean	new	proc.time	rainbow	read.csv	rep	replicate	runif	sample	seq	set.seed	uniseg
+synthetic-experiments	^	[<-	@	$	abline	aggloResult	anomalyDetectionResTimeIndices	as.numeric	benfordnessSignal	binSegCptMeanResult	binSegCptMeanVarResult	binSegCptVarResult	c	cp3oResult	divisiveResult	egadsAutoForecastResultFrame	egadsDoubleExponentialSmoothingResultFrame	egadsMovingAverageResultFrame	egadsMultipleLinearRegressionResultFrame	egadsNaiveForecastingResultFrame	egadsOlympicResultFrame	egadsPolynomialRegressionResultFrame	egadsSimpleExponentialSmoothingResultFrame	egadsSpectralSmootherResultFrame	egadsTripleExponentialSmoothingResultFrame	egadsWeightedMovingAverageResultFrame	extremeValuesIIResult	extremeValuesIResult	greenRedGreenColors	head	if	isExtendedVersion	layout	length	matrix	par	pDPARes	plot	rect	replicate	seq_along	timeSeriesVector	twitterBreakoutResult

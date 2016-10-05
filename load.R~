@@ -1,0 +1,8 @@
+library("BenfordTests")
+library("changepoint")
+library("TED")
+library("ecp")
+library("cghseg")
+library("AnomalyDetection")
+library("extremevalues")
+library("BreakoutDetection")

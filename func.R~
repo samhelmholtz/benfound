@@ -1,0 +1,190 @@
+                                        # a function to get the first digit of an non-zero integer
+getFirstDigit <- function(k){ as.numeric(head(strsplit(as.character(abs(k)),'')[[1]],n=1))}
+
+                                        # Some queue classes to help us build a Huffman tree and coding table
+Queue <- setRefClass(Class = "Queue",
+                     fields = list(
+                         name = "character",
+                         data = "list"
+                         ),
+                     methods = list(
+                         size = function() {
+                             'Returns the number of items in the queue.'
+                             return(length(data))
+                         },
+                                        #
+                         push = function(item) {
+                             'Inserts element at back of the queue.'
+                             data[[size()+1]] <<- item
+                         },
+                                        #
+                         pop = function() {
+                             'Removes and returns head of queue (or raises error if queue is empty).'
+                             if (size() == 0) stop("queue is empty!")
+                             value <- data[[1]]
+                             data[[1]] <<- NULL
+                             value
+                         },
+                                        #
+                         poll = function() {
+                             'Removes and returns head of queue (or NULL if queue is empty).'
+                             if (size() == 0) return(NULL)
+                             else pop()
+                         },
+                                        #
+                         peek = function(pos = c(1)) {
+                             'Returns (but does not remove) specified positions in queue (or NULL if any one of them is not available).'
+                             if (size() < max(pos)) return(NULL)
+                                        #
+                             if (length(pos) == 1) return(data[[pos]])
+                             else return(data[pos])
+                         },
+                         initialize=function(...) {
+                             callSuper(...)
+                                        #
+                                        # Initialise fields here (place holder)...
+                                        #
+                             .self
+                         }
+                         ))
+
+PriorityQueue <- setRefClass("PriorityQueue",
+                             contains = "Queue",
+                             fields = list(
+                                 priorities = "numeric"
+                                 ),
+                             methods = list(
+                                 push = function(item, priority) {
+                                     'Inserts element into the queue, reordering according to priority.'
+                                     callSuper(item)
+                                     priorities <<- c(priorities, priority)
+                                        #
+                                     order = order(priorities, decreasing = FALSE, partial = size():1)
+                                        #
+                                     data <<- data[order]
+                                     priorities <<- priorities[order]
+                                 },
+                                        #
+                                 pop = function() {
+                                     'Removes and returns head of queue (or raises error if queue is empty).'
+                                     if (size() == 0) stop("queue is empty!")
+                                     priorities <<- priorities[-1]
+                                     callSuper()
+                                 })
+                             )
+
+## Here 'nodes' have to be sorted in ascending frequency, and weights
+generateHuffmanTree <- function(listOfSymbolsAndPrios){
+    ## "The probabilities of the symbols are different from negative powers of two".
+
+    ## Simple construction algorithm
+    ## Create a leaf node for each symbol and add it to the priority queue
+    ## My leaf nodes are just integers I guess?
+    q <- PriorityQueue$new()
+    for(s in listOfSymbolsAndPrios){
+        q$push(s[1], s[2])
+    }
+
+    while(q$size() > 2){
+        qPriorities <- q$priorities
+        nextPriority <- qPriorities[1]+qPriorities[2]
+        leftChild <- q$pop()
+        rightChild <- q$pop()
+        nextNode <- list(leftChild, rightChild)
+        q$push(nextNode, nextPriority)
+    }
+
+    return(list(q$pop(), q$pop()))    
+}
+
+generateHuffmanCodeTable <- function(huffmanTree){
+    result <- data.frame(symbol=c(),code=c())
+
+    result <- appendCodeToTable(huffmanTree,result,"")
+    return(result)
+}
+
+appendCodeToTable <- function(treeNode, resultTable, codeSoFar){
+    if(is.list(treeNode)){
+        ## keep recursing
+        leftChild <- treeNode[[1]]
+        rightChild <- treeNode[[2]]
+        resultTable <- Recall(leftChild, resultTable, paste(codeSoFar,"0",sep=""))
+        resultTable <- Recall(rightChild, resultTable, paste(codeSoFar,"1",sep=""))
+    } else{        
+        ## We're done...append to the table
+        resultTable <- rbind(resultTable, data.frame(symbol=c(treeNode),code=c(codeSoFar),codeLength=c(nchar(codeSoFar))))
+    }
+    return(resultTable)
+}
+
+calculateMessageLength <- function(symbolsToSend, huffmanCodeTable){
+    codeLength <- 0
+    for(d in symbolsToSend){ codeLength <- codeLength+as.numeric(huffmanCodeTable[huffmanCodeTable$symbol==d,]$codeLength);}
+    return(codeLength)
+}
+
+getNumberOfDigitsInPositiveInteger <- function(positiveInteger, integerBase){
+    return(floor(log(positiveInteger,base=integerBase)+1))
+}
+
+generateListOfSymbolsAndPrios <- function(dataVector){
+
+    countsDataFrame <- count(dataVector)
+    symbols <- as.numeric(countsDataFrame$x)
+    probabilities <- as.numeric(countsDataFrame$freq)/length(dataVector)
+
+    sortMappings <- order(probabilities,decreasing=FALSE)
+    symbols <- symbols[sortMappings]
+    probabilities <- probabilities[sortMappings]
+
+    ## Finally, build up the list of symbols and their probabilities
+    result <- list()
+    for(i in seq_along(symbols)){
+        result <- c(result, list(c(symbols[i],probabilities[i])))
+    }
+    return(result)
+}
+
+getVlqSizeInBits <- function(integerValue){
+    if(integerValue==0){
+        return(1)
+    }
+    return(ceiling(floor(log(integerValue,base=2)+1)/7)*8)
+}
+
+getRemainderAfterRemovingFirstDigit <- function(integerValue, integerBase){
+    logValue <- log(integerValue, base=integerBase)
+    floorOfLogValue <- floor(logValue)
+    return(integerValue-integerBase^floorOfLogValue)
+}
+
+calculateProbabilityOfBlock <- function(digitSequence){
+    m <- length(digitSequence)
+    summation <- 0
+    for(j in seq_along(digitSequence)){
+        summation <- summation+ (digitSequence[j]*10^(m-j))
+    }
+    return(log10(1+(1/summation)))
+}
+
+calculateProbabilityOfIndividualDigitAtPosition <- function(digit, position){
+    ## To get this, it seems we need to add up the probabilities of all the individual occurrences right?
+    ## We may need to optimize this in the future
+    ## So firstly we need to start a counter representing the digits that come before the one we're interested in
+    counterStart <- 10^(position-2)
+    counterEnd <- 10^(position-1)
+    countSequence <- counterStart:(counterEnd-1)
+    probability <- 0
+    for(counter in countSequence){
+        startingDigits <- as.numeric(strsplit(as.character(counter),split="")[[1]])
+        probability <- probability + calculateProbabilityOfBlock(c(startingDigits, digit))
+    }
+    return(probability)
+}
+
+calculateConditionalProbabilityOfDigitAtPosition <- function(digit, position, given){
+    intersectionProbability <- calculateProbabilityOfBlock(c(given,digit))
+    individualProbability <- calculateProbabilityOfIndividualDigitAtPosition(digit,position)
+    return(intersectionProbability/individualProbability)
+}
